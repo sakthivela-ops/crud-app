@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Person</title>
+    <link rel="stylesheet" href="../css/view.css">
+</head>
+<body>
+    <div class="container">
+        <div class="wrapper">
+            <h1>Search Person</h1>
+            
+            <div class="search-section">
+                <input type="text" id="personSearch" class="search-input" placeholder="Enter person name...">
+                <button class="search-btn" onclick="searchPerson()">Search</button>
+            </div>
+
+            <div id="searchResults" style="display: none;">
+                <div class="person-info">
+                    <h2 id="personName"></h2>
+                    <p id="personEmail"></p>
+                    <p id="personPhone"></p>
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 20px;">Interested Sports</h3>
+                <div id="sportsContainer" class="sports-list">
+                    <!-- Sports will be populated here -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-back" onclick="clearSearch()">New Search</button>
+                    <button class="btn-edit-all" onclick="editAllSports()">Edit All Sports</button>
+                </div>
+            </div>
+
+            <div id="noResults" class="no-results" style="display: none;">
+                <p>No person found with that name.</p>
+                <button class="btn-back" onclick="clearSearch()">Back</button>
+            </div>
+
+            <div id="initialMessage" class="initial-message">
+                <p>Enter a person's name and click Search to view their interested sports.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - in real app, this would come from backend
+        const peopleData = [
+            {
+                id: 1,
+                name: 'John Doe',
+                email: 'john@example.com',
+                phone: '+1-234-567-8900',
+                sports: ['Cricket', 'Football', 'Basketball', 'Tennis']
+            },
+            {
+                id: 2,
+                name: 'Jane Smith',
+                email: 'jane@example.com',
+                phone: '+1-234-567-8901',
+                sports: ['Swimming', 'Badminton', 'Volleyball']
+            },
+            {
+                id: 3,
+                name: 'Mike Johnson',
+                email: 'mike@example.com',
+                phone: '+1-234-567-8902',
+                sports: ['Cricket', 'Swimming', 'Boxing']
+            }
+        ];
+
+        let currentPerson = null;
+
+        function searchPerson() {
+            const searchInput = document.getElementById('personSearch').value.trim().toLowerCase();
+            
+            if (!searchInput) {
+                alert('Please enter a person name');
+                return;
+            }
+
+            const found = peopleData.find(person => 
+                person.name.toLowerCase().includes(searchInput)
+            );
+
+            if (found) {
+                currentPerson = found;
+                displayPersonSports(found);
+            } else {
+                document.getElementById('initialMessage').style.display = 'none';
+                document.getElementById('searchResults').style.display = 'none';
+                document.getElementById('noResults').style.display = 'block';
+            }
+        }
+
+        function displayPersonSports(person) {
+            document.getElementById('initialMessage').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'block';
+
+            document.getElementById('personName').textContent = person.name;
+            document.getElementById('personEmail').textContent = `Email: ${person.email}`;
+            document.getElementById('personPhone').textContent = `Phone: ${person.phone}`;
+
+            const sportsContainer = document.getElementById('sportsContainer');
+            sportsContainer.innerHTML = '';
+
+            person.sports.forEach(sport => {
+                const sportCard = document.createElement('div');
+                sportCard.className = 'sport-card';
+                sportCard.dataset.sport = sport;
+                sportCard.innerHTML = `
+                    <div class="sport-info">
+                        <h3>${sport}</h3>
+                        <p class="sport-status">Active Interest</p>
+                    </div>
+                    <div class="sport-actions">
+                        <button class="btn-edit" onclick="editSport('${sport}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteSport('${sport}')">Delete</button>
+                    </div>
+                `;
+                sportsContainer.appendChild(sportCard);
+            });
+        }
+
+        function editSport(sportName) {
+            window.location.href = `edit_page.html?personId=${currentPerson.id}&sport=${encodeURIComponent(sportName)}`;
+        }
+
+        function deleteSport(sportName) {
+            if (confirm(`Are you sure you want to delete ${sportName} from ${currentPerson.name}'s interests?`)) {
+                const index = currentPerson.sports.indexOf(sportName);
+                if (index > -1) {
+                    currentPerson.sports.splice(index, 1);
+                    displayPersonSports(currentPerson);
+                }
+            }
+        }
+
+        function editAllSports() {
+            window.location.href = `edit_page.html?personId=${currentPerson.id}&editAll=true`;
+        }
+
+        function clearSearch() {
+            document.getElementById('personSearch').value = '';
+            document.getElementById('initialMessage').style.display = 'block';
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            currentPerson = null;
+        }
+
+        // Allow Enter key to search
+        document.getElementById('personSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPerson();
+            }
+        });
+    </script>
+</body>
+</html>
