@@ -1,7 +1,7 @@
 # file: show_tables.py
 import mysql.connector
 from mysql.connector import Error
-
+import os
 def show_tables(
     user="sakthivel",
     password="Qwerty@1234",  # <-- change this
