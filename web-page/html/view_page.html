@@ -46,52 +46,56 @@
     </div>
 
     <script>
-        // Sample data - in real app, this would come from backend
-        const peopleData = [
-            {
-                id: 1,
-                name: 'John Doe',
-                email: 'john@example.com',
-                phone: '+1-234-567-8900',
-                sports: ['Cricket', 'Football', 'Basketball', 'Tennis']
-            },
-            {
-                id: 2,
-                name: 'Jane Smith',
-                email: 'jane@example.com',
-                phone: '+1-234-567-8901',
-                sports: ['Swimming', 'Badminton', 'Volleyball']
-            },
-            {
-                id: 3,
-                name: 'Mike Johnson',
-                email: 'mike@example.com',
-                phone: '+1-234-567-8902',
-                sports: ['Cricket', 'Swimming', 'Boxing']
-            }
-        ];
+        // API Configuration - Update this for your deployment
+        const API_BASE_URL = 'http://localhost:5000/api';
 
         let currentPerson = null;
 
-        function searchPerson() {
-            const searchInput = document.getElementById('personSearch').value.trim().toLowerCase();
+        async function searchPerson() {
+            const searchInput = document.getElementById('personSearch').value.trim();
             
             if (!searchInput) {
                 alert('Please enter a person name');
                 return;
             }
 
-            const found = peopleData.find(person => 
-                person.name.toLowerCase().includes(searchInput)
-            );
-
-            if (found) {
-                currentPerson = found;
-                displayPersonSports(found);
-            } else {
+            try {
+                // Show loading state
                 document.getElementById('initialMessage').style.display = 'none';
+                document.getElementById('noResults').style.display = 'none';
                 document.getElementById('searchResults').style.display = 'none';
-                document.getElementById('noResults').style.display = 'block';
+
+                const response = await fetch(`${API_BASE_URL}/users/search?q=${encodeURIComponent(searchInput)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const results = await response.json();
+                
+                if (results.length > 0) {
+                    // Use the first result if multiple matches
+                    const found = results[0];
+                    // Map database field names to expected format
+                    currentPerson = {
+                        id: found.user_id,
+                        name: found.username,
+                        email: found.email,
+                        phone: found.phone_number,
+                        sports: found.sports || []
+                    };
+                    displayPersonSports(currentPerson);
+                } else {
+                    document.getElementById('initialMessage').style.display = 'none';
+                    document.getElementById('searchResults').style.display = 'none';
+                    document.getElementById('noResults').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error searching user:', error);
+                alert(`Error: ${error.message}`);
+                document.getElementById('initialMessage').style.display = 'block';
+                document.getElementById('searchResults').style.display = 'none';
+                document.getElementById('noResults').style.display = 'none';
             }
         }
 
