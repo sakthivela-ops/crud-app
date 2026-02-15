@@ -174,6 +174,69 @@ def get_all_sports():
         close_db_connection(conn)
 
 
+@app.route('/api/create', methods=['POST'])
+def create_user():
+    """Create a new user with their favorite sports"""
+    # Get form data
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+    phone = request.form.get('phone', '').strip()
+    sports = request.form.getlist('sports')
+    
+    # Validate required fields
+    if not name or not email or not phone:
+        return jsonify({"error": "Name, email, and phone number are required"}), 400
+    
+    # Validate phone number is 10 digits
+    if not phone.isdigit() or len(phone) != 10:
+        return jsonify({"error": "Phone number must be exactly 10 digits"}), 400
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Insert user into users table
+        cursor.execute(
+            "INSERT INTO users (username, email, phone_number) VALUES (%s, %s, %s)",
+            (name, email, phone)
+        )
+        
+        # Get the last inserted user_id
+        user_id = cursor.lastrowid
+        
+        # Insert favorite sports
+        if sports:
+            for sport in sports:
+                cursor.execute(
+                    "INSERT INTO favourite_sports (user_id, sport_name) VALUES (%s, %s)",
+                    (user_id, sport)
+                )
+        
+        # Commit the transaction
+        conn.commit()
+        
+        cursor.close()
+        return jsonify({
+            "message": "User created successfully",
+            "user_id": user_id,
+            "username": name,
+            "email": email,
+            "phone_number": phone,
+            "sports": sports
+        }), 201
+    
+    except Error as e:
+        conn.rollback()
+        cursor.close()
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        close_db_connection(conn)
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""

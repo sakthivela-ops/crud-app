@@ -70,7 +70,56 @@
                     <button type="reset" class="btn btn-secondary">Clear</button>
                 </div>
             </form>
+            <div id="message" style="margin-top: 20px; padding: 10px; display: none;"></div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('createForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                // Send POST request to API
+                const response = await fetch('/api/create', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Success
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.backgroundColor = '#d4edda';
+                    messageDiv.style.color = '#155724';
+                    messageDiv.style.border = '1px solid #c3e6cb';
+                    messageDiv.style.borderRadius = '4px';
+                    messageDiv.innerHTML = `<strong>Success!</strong> User ${data.username} created with ID ${data.user_id}. <a href="/html/view_page.html" style="color: #155724; text-decoration: underline;">View all users</a>`;
+                    
+                    // Reset form
+                    this.reset();
+                } else {
+                    // Error
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.backgroundColor = '#f8d7da';
+                    messageDiv.style.color = '#721c24';
+                    messageDiv.style.border = '1px solid #f5c6cb';
+                    messageDiv.style.borderRadius = '4px';
+                    messageDiv.innerHTML = `<strong>Error!</strong> ${data.error}`;
+                }
+            } catch (error) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.backgroundColor = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.border = '1px solid #f5c6cb';
+                messageDiv.style.borderRadius = '4px';
+                messageDiv.innerHTML = `<strong>Error!</strong> ${error.message}`;
+            }
+        });
+    </script>
 </body>
 </html>
