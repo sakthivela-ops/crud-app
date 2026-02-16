@@ -36,6 +36,25 @@ def close_db_connection(conn):
         conn.close()
 
 
+@app.route('/', methods=['GET'])
+def index():
+    """Root endpoint - welcome message"""
+    return jsonify({
+        "message": "CRUD API Server",
+        "status": "running",
+        "endpoints": {
+            "GET /api/users": "Get all users with their sports",
+            "GET /api/users/search": "Search users by name",
+            "GET /api/users/<id>": "Get specific user",
+            "GET /api/sports": "Get all sports",
+            "POST /api/create": "Create new user with sports",
+            "PUT /api/users/<id>/sports": "Update user's sports",
+            "DELETE /api/users/<id>": "Delete user",
+            "GET /api/health": "Health check"
+        }
+    }), 200
+
+
 @app.route('/api/users', methods=['GET'])
 def get_all_users():
     """Get all users with their favorite sports"""
