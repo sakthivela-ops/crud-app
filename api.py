@@ -285,6 +285,6 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    # Run on localhost:5000
+    # Run on all network interfaces (0.0.0.0) so it's accessible from other devices
     # For production with nginx, ensure CORS is properly configured
-    app.run(host='127.0.0.1', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False)
