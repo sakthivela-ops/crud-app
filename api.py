@@ -36,58 +36,6 @@ def close_db_connection(conn):
         conn.close()
 
 
-@app.route('/', methods=['GET'])
-def index():
-    """Root endpoint - welcome message"""
-    return jsonify({
-        "message": "CRUD API Server",
-        "status": "running",
-        "endpoints": {
-            "GET /api/users": "Get all users with their sports",
-            "GET /api/users/search": "Search users by name",
-            "GET /api/users/<id>": "Get specific user",
-            "GET /api/sports": "Get all sports",
-            "POST /api/create": "Create new user with sports",
-            "PUT /api/users/<id>/sports": "Update user's sports",
-            "DELETE /api/users/<id>": "Delete user",
-            "GET /api/health": "Health check"
-        }
-    }), 200
-
-
-@app.route('/api/users', methods=['GET'])
-def get_all_users():
-    """Get all users with their favorite sports"""
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    try:
-        cursor = conn.cursor(dictionary=True)
-        
-        # Get all users
-        cursor.execute("SELECT user_id, username, email, phone_number FROM users")
-        users = cursor.fetchall()
-        
-        # For each user, get their favorite sports
-        for user in users:
-            cursor.execute(
-                "SELECT sport_name FROM favourite_sports WHERE user_id = %s",
-                (user['user_id'],)
-            )
-            sports = [row['sport_name'] for row in cursor.fetchall()]
-            user['sports'] = sports
-        
-        cursor.close()
-        return jsonify(users), 200
-    
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
-    
-    finally:
-        close_db_connection(conn)
-
-
 @app.route('/api/users/search', methods=['GET'])
 def search_users():
     """Search users by username"""
@@ -160,31 +108,6 @@ def get_user(user_id):
         
         cursor.close()
         return jsonify(user), 200
-    
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
-    
-    finally:
-        close_db_connection(conn)
-
-
-@app.route('/api/sports', methods=['GET'])
-def get_all_sports():
-    """Get all sports from all users"""
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            """SELECT DISTINCT fs.sport_name, fs.user_id, u.username 
-               FROM favourite_sports fs 
-               JOIN users u ON fs.user_id = u.user_id"""
-        )
-        sports = cursor.fetchall()
-        cursor.close()
-        return jsonify(sports), 200
     
     except Error as e:
         return jsonify({"error": str(e)}), 500

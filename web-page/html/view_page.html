@@ -20,21 +20,29 @@
             </div>
 
             <div id="searchResults" style="display: none;">
-                <div class="person-info">
-                    <h2 id="personName"></h2>
-                    <p id="personEmail"></p>
-                    <p id="personPhone"></p>
+                <div id="multipleResults" style="display: none;">
+                    <h3>Found Multiple Users</h3>
+                    <p>Select a user to view details:</p>
+                    <div id="multipleUsersList" style="margin: 20px 0; display: grid; gap: 10px;"></div>
                 </div>
 
-                <h3 style="margin-top: 30px; margin-bottom: 20px;">Interested Sports</h3>
-                <div id="sportsContainer" class="sports-list">
-                    <!-- Sports will be populated here -->
-                </div>
+                <div id="singleResult" style="display: none;">
+                    <div class="person-info">
+                        <h2 id="personName"></h2>
+                        <p id="personEmail"></p>
+                        <p id="personPhone"></p>
+                    </div>
 
-                <div class="action-buttons">
-                    <button class="btn-back" onclick="clearSearch()">New Search</button>
-                    <button class="btn-edit-all" onclick="editUser()">Edit Sports</button>
-                    <button class="btn-delete" onclick="deleteUser()">Delete User</button>
+                    <h3 style="margin-top: 30px; margin-bottom: 20px;">Interested Sports</h3>
+                    <div id="sportsContainer" class="sports-list">
+                        <!-- Sports will be populated here -->
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-back" onclick="clearSearch()">New Search</button>
+                        <button class="btn-edit-all" onclick="editUser()">Edit Sports</button>
+                        <button class="btn-delete" onclick="deleteUser()">Delete User</button>
+                    </div>
                 </div>
             </div>
 
@@ -78,17 +86,21 @@
                 const results = await response.json();
                 
                 if (results.length > 0) {
-                    // Use the first result if multiple matches
-                    const found = results[0];
-                    // Map database field names to expected format
-                    currentPerson = {
-                        id: found.user_id,
-                        name: found.username,
-                        email: found.email,
-                        phone: found.phone_number,
-                        sports: found.sports || []
-                    };
-                    displayPersonSports(currentPerson);
+                    if (results.length === 1) {
+                        // Single result: display directly
+                        const found = results[0];
+                        currentPerson = {
+                            id: found.user_id,
+                            name: found.username,
+                            email: found.email,
+                            phone: found.phone_number,
+                            sports: found.sports || []
+                        };
+                        displayPersonSports(currentPerson);
+                    } else {
+                        // Multiple results: show list to select from
+                        displayMultipleResults(results);
+                    }
                 } else {
                     document.getElementById('initialMessage').style.display = 'none';
                     document.getElementById('searchResults').style.display = 'none';
@@ -103,10 +115,70 @@
             }
         }
 
+        function displayMultipleResults(results) {
+            document.getElementById('initialMessage').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'block';
+            document.getElementById('multipleResults').style.display = 'block';
+            document.getElementById('singleResult').style.display = 'none';
+
+            const listContainer = document.getElementById('multipleUsersList');
+            listContainer.innerHTML = '';
+
+            results.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.style.padding = '15px';
+                userCard.style.border = '2px solid #e0e0e0';
+                userCard.style.borderRadius = '8px';
+                userCard.style.cursor = 'pointer';
+                userCard.style.transition = 'all 0.3s ease';
+                userCard.style.backgroundColor = '#f9f9f9';
+
+                const userData = {
+                    id: user.user_id,
+                    name: user.username,
+                    email: user.email,
+                    phone: user.phone_number,
+                    sports: user.sports || []
+                };
+
+                userCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;"><div>
+                        <h3 style="margin: 0 0 5px 0; color: #333;">${user.username}</h3>
+                        <p style="margin: 0 0 3px 0; font-size: 14px; color: #666;">${user.email}</p>
+                        <p style="margin: 0; font-size: 14px; color: #666;">${user.phone_number}</p>
+                    </div>
+                    <button class="btn-select" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">View</button>
+                    </div>
+                `;
+
+                userCard.onmouseover = () => {
+                    userCard.style.backgroundColor = '#fff';
+                    userCard.style.borderColor = '#667eea';
+                    userCard.style.transform = 'translateY(-2px)';
+                };
+
+                userCard.onmouseout = () => {
+                    userCard.style.backgroundColor = '#f9f9f9';
+                    userCard.style.borderColor = '#e0e0e0';
+                    userCard.style.transform = 'translateY(0)';
+                };
+
+                userCard.onclick = () => {
+                    currentPerson = userData;
+                    displayPersonSports(currentPerson);
+                };
+
+                listContainer.appendChild(userCard);
+            });
+        }
+
         function displayPersonSports(person) {
             document.getElementById('initialMessage').style.display = 'none';
             document.getElementById('noResults').style.display = 'none';
             document.getElementById('searchResults').style.display = 'block';
+            document.getElementById('multipleResults').style.display = 'none';
+            document.getElementById('singleResult').style.display = 'block';
 
             document.getElementById('personName').textContent = person.name;
             document.getElementById('personEmail').textContent = `Email: ${person.email}`;
