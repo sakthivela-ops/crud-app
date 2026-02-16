@@ -237,6 +237,88 @@ def create_user():
         close_db_connection(conn)
 
 
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """Delete a user and their favorite sports"""
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Check if user exists
+        cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            return jsonify({"error": "User not found"}), 404
+        
+        # Delete sports first (foreign key constraint)
+        cursor.execute("DELETE FROM favourite_sports WHERE user_id = %s", (user_id,))
+        
+        # Delete user
+        cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+        
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "User deleted successfully"}), 200
+    
+    except Error as e:
+        conn.rollback()
+        cursor.close()
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        close_db_connection(conn)
+
+
+@app.route('/api/users/<int:user_id>/sports', methods=['PUT'])
+def update_user_sports(user_id):
+    """Update user's favorite sports"""
+    # Get sports list from request
+    sports = request.form.getlist('sports')
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Check if user exists
+        cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            return jsonify({"error": "User not found"}), 404
+        
+        # Delete existing sports
+        cursor.execute("DELETE FROM favourite_sports WHERE user_id = %s", (user_id,))
+        
+        # Insert new sports
+        if sports:
+            for sport in sports:
+                cursor.execute(
+                    "INSERT INTO favourite_sports (user_id, sport_name) VALUES (%s, %s)",
+                    (user_id, sport)
+                )
+        
+        conn.commit()
+        cursor.close()
+        return jsonify({
+            "message": "Sports updated successfully",
+            "user_id": user_id,
+            "sports": sports
+        }), 200
+    
+    except Error as e:
+        conn.rollback()
+        cursor.close()
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        close_db_connection(conn)
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""

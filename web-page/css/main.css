@@ -139,6 +139,23 @@ h1 {
     border-color: #999;
 }
 
+.btn-view-users {
+    padding: 10px 25px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 500;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-view-users:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
 @media (max-width: 600px) {
     .form-wrapper {
         padding: 30px 20px;

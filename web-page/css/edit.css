@@ -39,6 +39,67 @@ h2 {
     margin-bottom: 20px;
 }
 
+.user-info {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.user-info h2 {
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.user-info p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.user-info p:last-child {
+    margin-bottom: 0;
+}
+
+.sports-list {
+    background: #f8f9fa;
+    border: 1px solid #e8ecf1;
+    border-radius: 8px;
+    padding: 25px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.sports-list label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 400;
+    color: #555;
+    transition: all 0.2s ease;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.sports-list label:hover {
+    background: #ffffff;
+    color: #667eea;
+}
+
+.sports-list input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.sports-list span {
+    font-size: 15px;
+}
+
 .form-group {
     margin-bottom: 25px;
 }
@@ -83,18 +144,22 @@ h2 {
 .form-actions {
     display: flex;
     gap: 15px;
-    margin-top: 30px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
 }
 
 .btn {
     flex: 1;
-    padding: 12px 20px;
+    padding: 14px 20px;
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: 500;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-primary {
@@ -120,6 +185,19 @@ h2 {
 .btn-secondary:hover {
     background-color: #e8e8e8;
     border-color: #999;
+}
+
+#message {
+    padding: 15px 20px !important;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-top: 20px;
+}
+
+#errorMessage {
+    padding: 15px 20px !important;
+    border-radius: 8px;
+    margin-top: 20px;
 }
 
 .btn-danger {
@@ -194,6 +272,13 @@ h2 {
 
     .form-actions {
         flex-direction: column;
+    }
+
+    .sports-list {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px;
+    }
     }
 
     .sport-item {
